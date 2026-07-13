@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocuMind RAG System — Beginner's Complete Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --border: rgba(99,102,241,0.2);
+    --purple: #a78bfa;
+    --blue: #60a5fa;
+    --green: #34d399;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --yellow: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --code-bg: #0d1117;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 15px;
+  }
+
+  /* ─── COVER PAGE ─── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #0a0e1a 100%);
+    padding: 3rem;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cover-brain { font-size: 6rem; margin-bottom: 1.5rem; }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: 30px;
+    padding: 0.4rem 1.5rem;
+    font-size: 0.78rem;
+    color: var(--purple);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  .cover-title {
+    font-size: 4rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .cover-subtitle {
+    font-size: 1.3rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 3rem;
+  }
+  .cover-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 4rem;
+  }
+  .tag {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+  .cover-meta {
+    color: #374151;
+    font-size: 0.82rem;
+    line-height: 2;
+  }
+
+  /* ─── LAYOUT ─── */
+  .page { max-width: 900px; margin: 0 auto; padding: 4rem 3rem; }
+  .page-break { page-break-before: always; margin-top: 5rem; }
+
+  /* ─── CHAPTER HEADER ─── */
+  .chapter-header {
+    border-left: 4px solid var(--purple);
+    padding: 1.5rem 2rem;
+    background: rgba(99,102,241,0.06);
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 2.5rem;
+  }
+  .chapter-num {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  .chapter-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .chapter-desc {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 0.4rem;
+  }
+
+  /* ─── SECTION ─── */
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--blue);
+    margin: 1.75rem 0 0.75rem;
+  }
+  p { margin-bottom: 1rem; color: #d1d5db; }
+
+  /* ─── CODE BLOCKS ─── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    margin: 1.25rem 0;
+    position: relative;
+  }
+  pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: #e2e8f0;
+  }
+  .code-label {
+    position: absolute;
+    top: -0.5rem;
+    left: 1rem;
+    background: var(--purple);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(99,102,241,0.12);
+    color: var(--purple);
+    padding: 0.15rem 0.45rem;
+    border-radius: 5px;
+    font-size: 0.83em;
+  }
+
+  /* ─── SYNTAX HIGHLIGHTING ─── */
+  .kw  { color: #c792ea; }
+  .fn  { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cmt { color: #546e7a; font-style: italic; }
+  .num { color: #f78c6c; }
+  .cls { color: #ffcb6b; }
+  .dec { color: #89ddff; }
+  .var { color: #eeffff; }
+
+  /* ─── CALLOUTS ─── */
+  .callout {
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    border-left: 4px solid;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-body { flex: 1; }
+  .callout-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .callout-text { font-size: 0.88rem; color: #9ca3af; line-height: 1.7; }
+  .callout-text code { font-size: 0.8em; }
+
+  .callout.tip    { background: rgba(52,211,153,0.06); border-color: var(--green);  }
+  .callout.tip .callout-title   { color: var(--green);  }
+  .callout.warn   { background: rgba(251,191,36,0.06);  border-color: var(--yellow); }
+  .callout.warn .callout-title  { color: var(--yellow); }
+  .callout.info   { background: rgba(96,165,250,0.06);  border-color: var(--blue);   }
+  .callout.info .callout-title  { color: var(--blue);   }
+  .callout.key    { background: rgba(167,139,250,0.06); border-color: var(--purple); }
+  .callout.key .callout-title   { color: var(--purple); }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: rgba(13,17,23,0.6);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .flow-step {
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--purple);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--muted); font-size: 1.2rem; font-weight: 300; }
+
+  /* ─── COMPARISON TABLE ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.88rem;
+  }
+  th {
+    background: rgba(99,102,241,0.12);
+    color: var(--purple);
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    color: #d1d5db;
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(99,102,241,0.04); }
+
+  /* ─── CONCEPT CARD ─── */
+  .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .concept-card {
+    background: rgba(13,17,23,0.8);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .concept-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .concept-name { font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 0.4rem; }
+  .concept-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+  /* ─── NUMBERED LIST ─── */
+  ol { padding-left: 1.5rem; }
+  ol li { margin-bottom: 0.75rem; color: #d1d5db; }
+  ul { padding-left: 1.5rem; }
+  ul li { margin-bottom: 0.5rem; color: #d1d5db; }
+  ul li::marker { color: var(--purple); }
+
+  /* ─── STEP BLOCK ─── */
+  .steps { counter-reset: step-counter; list-style: none; padding: 0; }
+  .steps li {
+    counter-increment: step-counter;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    align-items: flex-start;
+  }
+  .steps li::before {
+    content: counter(step-counter);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    font-weight: 700;
+    font-size: 0.78rem;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .steps li .step-content { flex: 1; }
+  .steps li .step-title { font-weight: 600; color: var(--text); margin-bottom: 0.2rem; }
+  .steps li .step-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* ─── HIGHLIGHT ─── */
+  .highlight { color: var(--green); font-weight: 600; }
+  .hl-purple { color: var(--purple); font-weight: 600; }
+  .hl-blue   { color: var(--blue);   font-weight: 600; }
+  .hl-orange { color: var(--orange); font-weight: 600; }
+
+  /* ─── DIVIDER ─── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 3rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  /* ─── PRINT STYLES ─── */
+  @media print {
+    body { background: white; color: #111; font-size: 12pt; }
+    .cover { background: #0a0a0f !important; min-height: 100vh; }
+    pre, .concept-card, .callout, .flow { page-break-inside: avoid; }
+    .page { padding: 2rem; }
+  }
+
+  /* ─── ARCHITECTURE DIAGRAM ─── */
+  .arch-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 2;
+    color: #9ca3af;
+    text-align: center;
+  }
+  .arch-diagram .arch-user   { color: var(--blue);   font-weight: 700; }
+  .arch-diagram .arch-api    { color: var(--purple); font-weight: 700; }
+  .arch-diagram .arch-llm    { color: var(--green);  font-weight: 700; }
+  .arch-diagram .arch-store  { color: var(--orange); font-weight: 700; }
+  .arch-diagram .arch-embed  { color: var(--pink);   font-weight: 700; }
+  .arch-diagram .arch-arrow  { color: #374151; }
+  .arch-box {
+    display: inline-block;
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    margin: 0.2rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     COVER PAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-brain">🧠</div>
+  <div class="cover-badge">Complete Beginner's Guide</div>
+  <div class="cover-title">DocuMind<br>RAG System</div>
+  <div class="cover-subtitle">Intelligent Document Q&amp;A · Powered by LLMs + Vector Search</div>
+  <div class="cover-tags">
+    <span class="tag">🐍 Python</span>
+    <span class="tag">🦜 LangChain</span>
+    <span class="tag">🔍 FAISS</span>
+    <span class="tag">⚡ Groq API</span>
+    <span class="tag">🚀 FastAPI</span>
+    <span class="tag">🎨 Streamlit</span>
+    <span class="tag">🤖 LLaMA 3 70B</span>
+    <span class="tag">📄 RAG Pipeline</span>
+  </div>
+  <div class="cover-meta">
+    Built for Celonis AI Internship Portfolio<br>
+    NLP · Generative AI · Unstructured Data · REST APIs<br>
+    <span style="color:#4b5563;">Every line of code explained from scratch</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 1 — WHAT IS RAG?
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 1</div>
+    <div class="chapter-title">What is RAG?</div>
+    <div class="chapter-desc">The big idea explained in plain English before any code</div>
+  </div>
+
+  <h2>🤔 The Problem RAG Solves</h2>
+  <p>
+    Imagine you upload a 200-page company annual report and ask: <em>"What is the company's AI strategy?"</em>
+    A regular LLM (like ChatGPT) has two problems:
+  </p>
+  <ul>
+    <li>It <strong>can't read your file</strong> — it only knows what it was trained on (data from the internet, cut off at a certain date)</li>
+    <li>Even if it could, 200 pages is too long to fit in a single prompt (LLMs have a "context window" limit)</li>
+  </ul>
+  <p>
+    <strong>RAG (Retrieval-Augmented Generation)</strong> solves this by splitting the task into two parts:
+  </p>
+  <ul>
+    <li><span class="highlight">Retrieval</span> — Find only the <em>relevant</em> parts of the document (not the whole thing)</li>
+    <li><span class="highlight">Generation</span> — Feed those parts to the LLM and let it write a grounded answer</li>
+  </ul>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <div class="callout-title">The Perfect Analogy</div>
+      <div class="callout-text">
+        Think of RAG like an open-book exam. Without RAG = answering from memory (LLM might hallucinate).
+        With RAG = you can look up specific pages in your textbook before answering.
+        The LLM reads those specific pages and writes a precise, sourced answer.
+      </div>
+    </div>
+  </div>
+
+  <h2>🗺️ The Full Pipeline at a Glance</h2>
+  <div class="flow">
+    <div class="flow-step">📄 PDF File</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">📝 Extract Text</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">✂️ Chunk Text</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">🔢 Embed (Vectorize)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">🗄️ FAISS Index</div>
+  </div>
+  <div class="flow">
+    <div class="flow-step">❓ User Question</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">🔢 Embed Question</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">🔍 FAISS Search</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">📑 Top 5 Chunks</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">🤖 LLM Answer</div>
+  </div>
+
+  <h2>📚 Key Concepts You Need to Understand</h2>
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="concept-icon">✂️</div>
+      <div class="concept-name">Text Chunking</div>
+      <div class="concept-desc">Breaking a long document into small, overlapping pieces (~200 words each). LLMs can't read the whole document at once, so we only send the relevant pieces.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🔢</div>
+      <div class="concept-name">Embeddings (Vectors)</div>
+      <div class="concept-desc">Converting text into a list of numbers (a vector) that captures its meaning. Similar texts have similar vectors. "Revenue grew" and "Sales increased" are close in vector space.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🗄️</div>
+      <div class="concept-name">FAISS Vector Store</div>
+      <div class="concept-desc">A database that stores millions of vectors and can find the nearest ones to a query in milliseconds. Built by Facebook AI Research — industry standard.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🤖</div>
+      <div class="concept-name">LLM (Groq + LLaMA 3)</div>
+      <div class="concept-desc">The AI brain that reads the retrieved chunks + the question and writes a human-quality answer. LLaMA 3 70B is Meta's best open-source model, running free on Groq's fast hardware.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🚀</div>
+      <div class="concept-name">FastAPI</div>
+      <div class="concept-desc">A Python web framework for building REST APIs. Every function becomes an HTTP endpoint. Includes auto-generated interactive docs at /docs. Used by Netflix, Uber, and Microsoft.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🎨</div>
+      <div class="concept-name">Streamlit</div>
+      <div class="concept-desc">A Python library that converts Python scripts into interactive web apps. No HTML or JavaScript needed. Re-runs the entire script whenever a user interacts with a widget.</div>
+    </div>
+  </div>
+
+  <h2>🏗️ System Architecture</h2>
+  <div class="arch-diagram">
+    <div>
+      <span class="arch-user arch-box" style="border-color:#60a5fa">👤 User (Browser)</span>
+    </div>
+    <div class="arch-arrow">⬇ HTTP requests</div>
+    <div>
+      <span class="arch-api arch-box" style="border-color:#a78bfa">🎨 Streamlit UI (port 8501)</span>
+    </div>
+    <div class="arch-arrow">⬇ REST API calls (requests library)</div>
+    <div>
+      <span class="arch-api arch-box" style="border-color:#a78bfa">🚀 FastAPI Backend (port 8000)</span>
+    </div>
+    <div class="arch-arrow">⬇ orchestrates</div>
+    <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;">
+      <div>
+        <span class="arch-embed arch-box" style="border-color:#f472b6">📄 PyMuPDF → Chunks</span>
+        <div class="arch-arrow">⬇</div>
+        <span class="arch-embed arch-box" style="border-color:#f472b6">🔢 sentence-transformers</span>
+        <div class="arch-arrow">⬇</div>
+        <span class="arch-store arch-box" style="border-color:#fb923c">🗄️ FAISS Index</span>
+      </div>
+      <div style="display:flex; align-items:center; color:#374151; font-size:1.5rem;">⟷</div>
+      <div style="display:flex; align-items:center;">
+        <span class="arch-llm arch-box" style="border-color:#34d399">⚡ Groq API<br>LLaMA 3 70B</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 2 — PROJECT STRUCTURE
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 2</div>
+    <div class="chapter-title">Project Structure</div>
+    <div class="chapter-desc">Every file and what it does</div>
+  </div>
+
+  <pre style="position:relative"><div class="code-label">dox/ folder structure</div><code><span class="var">dox/</span>
+├── <span class="cls">app/</span>                     <span class="cmt"># The Python package (backend logic)</span>
+│   ├── <span class="fn">__init__.py</span>          <span class="cmt"># Makes 'app' a Python package</span>
+│   ├── <span class="fn">pdf_processor.py</span>     <span class="cmt"># Step 1: PDF → text chunks</span>
+│   ├── <span class="fn">vector_store.py</span>      <span class="cmt"># Step 2: chunks → embeddings → FAISS</span>
+│   ├── <span class="fn">groq_client.py</span>       <span class="cmt"># Step 3: chunks + question → LLM answer</span>
+│   ├── <span class="fn">rag_pipeline.py</span>      <span class="cmt"># Orchestrator — connects all 3 steps</span>
+│   └── <span class="fn">main.py</span>              <span class="cmt"># FastAPI REST API server</span>
+│
+├── <span class="fn">streamlit_app.py</span>         <span class="cmt"># The interactive web UI</span>
+├── <span class="fn">requirements.txt</span>         <span class="cmt"># All Python packages needed</span>
+├── <span class="fn">.env</span>                     <span class="cmt"># Secret keys (never commit this!)</span>
+├── <span class="fn">.env.example</span>             <span class="cmt"># Template for .env</span>
+├── <span class="fn">.gitignore</span>               <span class="cmt"># Files Git should ignore</span>
+└── <span class="fn">run.bat</span>                  <span class="cmt"># One-click launcher (Windows)</span></code></pre>
+
+  <h2>📦 The requirements.txt — Every Package Explained</h2>
+  <table>
+    <thead>
+      <tr><th>Package</th><th>What it does</th><th>Why we need it</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>groq</code></td>
+        <td>Groq API Python client</td>
+        <td>Calls the LLaMA 3 70B model hosted on Groq's fast servers (free)</td>
+      </tr>
+      <tr>
+        <td><code>sentence-transformers</code></td>
+        <td>Local text embedding model</td>
+        <td>Converts text chunks into 384-number vectors capturing their meaning</td>
+      </tr>
+      <tr>
+        <td><code>faiss-cpu</code></td>
+        <td>Facebook AI Similarity Search</td>
+        <td>Stores and searches through millions of vectors in milliseconds</td>
+      </tr>
+      <tr>
+        <td><code>pymupdf</code></td>
+        <td>PDF reader (imported as <code>fitz</code>)</td>
+        <td>Extracts text from every page of a PDF file</td>
+      </tr>
+      <tr>
+        <td><code>fastapi</code></td>
+        <td>Web API framework</td>
+        <td>Creates REST endpoints: /upload, /ask, /documents</td>
+      </tr>
+      <tr>
+        <td><code>uvicorn</code></td>
+        <td>ASGI web server</td>
+        <td>Runs the FastAPI app and handles incoming HTTP requests</td>
+      </tr>
+      <tr>
+        <td><code>python-multipart</code></td>
+        <td>File upload parser</td>
+        <td>Required for FastAPI to receive uploaded PDF files</td>
+      </tr>
+      <tr>
+        <td><code>streamlit</code></td>
+        <td>Web UI framework</td>
+        <td>Turns our Python script into an interactive browser app</td>
+      </tr>
+      <tr>
+        <td><code>requests</code></td>
+        <td>HTTP client library</td>
+        <td>Streamlit uses this to call the FastAPI endpoints</td>
+      </tr>
+      <tr>
+        <td><code>python-dotenv</code></td>
+        <td>.env file loader</td>
+        <td>Reads GROQ_API_KEY from the .env file into os.environ</td>
+      </tr>
+      <tr>
+        <td><code>numpy</code></td>
+        <td>Numerical arrays</td>
+        <td>FAISS requires numpy arrays; also used by sentence-transformers</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 3 — PDF PROCESSOR
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 3</div>
+    <div class="chapter-title">pdf_processor.py</div>
+    <div class="chapter-desc">Step 1 of RAG: Read the document and split it into smart chunks</div>
+  </div>
+
+  <h2>🎯 What This File Does</h2>
+  <p>Before any AI magic can happen, we need to <strong>read the PDF</strong> and <strong>break it into small pieces</strong>. This file has two functions that do exactly that.</p>
+
+  <h3>Function 1: extract_text_from_pdf()</h3>
+  <pre><code><span class="kw">import</span> fitz  <span class="cmt"># PyMuPDF — fitz is the internal name for pymupdf</span>
+
+<span class="kw">def</span> <span class="fn">extract_text_from_pdf</span>(pdf_path: <span class="cls">str</span>) -> <span class="cls">list</span>:
+    <span class="str">"""Open a PDF and extract text from every page."""</span>
+    
+    doc = fitz.<span class="fn">open</span>(pdf_path)  <span class="cmt"># Load PDF into memory</span>
+    <span class="cmt"># doc is now a PDF document object</span>
+    <span class="cmt"># len(doc) = number of pages</span>
+    
+    pages = []
+    <span class="kw">for</span> page_num <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(doc)):    <span class="cmt"># Loop: 0, 1, 2, ... n-1</span>
+        page = doc[page_num]               <span class="cmt"># Get page object by index</span>
+        text = page.<span class="fn">get_text</span>()           <span class="cmt"># Extract all text from that page</span>
+        
+        <span class="kw">if</span> text.<span class="fn">strip</span>():                  <span class="cmt"># Skip empty pages</span>
+            pages.<span class="fn">append</span>({
+                <span class="str">"page_num"</span>: page_num + <span class="num">1</span>,  <span class="cmt"># +1: pages start at 1, not 0</span>
+                <span class="str">"text"</span>: text.<span class="fn">strip</span>()         <span class="cmt"># .strip() removes extra whitespace</span>
+            })
+    
+    doc.<span class="fn">close</span>()  <span class="cmt"># Always close the file when done</span>
+    <span class="kw">return</span> pages</code></pre>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div class="callout-body">
+      <div class="callout-title">Why fitz instead of pymupdf?</div>
+      <div class="callout-text">
+        The package is installed as <code>pymupdf</code> but imported as <code>fitz</code>. This is historical — the library was originally called "fitz" (named after the PDF spec author). Both names work: <code>import fitz</code> and <code>import pymupdf</code> import the same library.
+      </div>
+    </div>
+  </div>
+
+  <h3>Function 2: chunk_text()</h3>
+  <p>Now here's the clever part. We can't send 200 pages to the LLM — it's too long. We split the text into <strong>overlapping chunks</strong>.</p>
+  <pre><code><span class="kw">def</span> <span class="fn">chunk_text</span>(pages, chunk_size=<span class="num">200</span>, overlap=<span class="num">30</span>):
+    <span class="str">"""Split pages into overlapping word chunks."""</span>
+    chunks = []
+    chunk_id = <span class="num">0</span>
+    
+    <span class="kw">for</span> page_data <span class="kw">in</span> pages:             <span class="cmt"># Loop through each page</span>
+        words = page_data[<span class="str">"text"</span>].<span class="fn">split</span>() <span class="cmt"># Split text into individual words</span>
+        <span class="cmt"># e.g., "Hello world" → ["Hello", "world"]</span>
+        
+        i = <span class="num">0</span>
+        <span class="kw">while</span> i < <span class="fn">len</span>(words):
+            chunk_words = words[i : i + chunk_size]  <span class="cmt"># Grab 200 words</span>
+            chunk_text = <span class="str">" "</span>.<span class="fn">join</span>(chunk_words)        <span class="cmt"># Rejoin as string</span>
+            
+            chunks.<span class="fn">append</span>({
+                <span class="str">"chunk_id"</span>: chunk_id,
+                <span class="str">"page_num"</span>: page_data[<span class="str">"page_num"</span>],
+                <span class="str">"text"</span>:     chunk_text,
+                <span class="str">"word_start"</span>: i
+            })
+            chunk_id += <span class="num">1</span>
+            
+            i += chunk_size - overlap  <span class="cmt"># Move forward by 170 (200-30)</span>
+            <span class="cmt"># This creates overlap: last 30 words of chunk N</span>
+            <span class="cmt"># become the first 30 words of chunk N+1</span>
+    
+    <span class="kw">return</span> chunks</code></pre>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <div class="callout-title">Why Overlap Matters</div>
+      <div class="callout-text">
+        Without overlap, a key sentence split across two chunks would lose context. With <strong>30-word overlap</strong>, the end of chunk 1 is repeated at the start of chunk 2, preserving meaning across boundaries. Imagine if "The company's Q3 revenue was $2.1 billion, <em>representing a...</em>" was cut in half — you'd lose the conclusion without overlap.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 4 — VECTOR STORE
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 4</div>
+    <div class="chapter-title">vector_store.py</div>
+    <div class="chapter-desc">Step 2 of RAG: Convert text to numbers and enable lightning-fast semantic search</div>
+  </div>
+
+  <h2>🔢 What Are Embeddings?</h2>
+  <p>
+    An <strong>embedding</strong> is a list of numbers (a vector) that represents the <em>meaning</em> of a piece of text.
+    The sentence-transformers model converts any sentence into a list of 384 numbers.
+  </p>
+  <pre><code><span class="cmt"># "Revenue grew 20% in Q3"  →  [0.23, -0.54, 0.12, ..., 0.87]  (384 numbers)</span>
+<span class="cmt"># "Sales increased by a fifth" → [0.25, -0.51, 0.14, ..., 0.85]  (very similar!)</span>
+<span class="cmt"># "The cat sat on a mat"     →  [-0.45, 0.23, -0.78, ..., 0.12] (very different!)</span></code></pre>
+
+  <p>FAISS measures the <strong>distance</strong> between vectors. Closer vectors = similar meaning. So when you ask "What is the revenue?", FAISS finds the chunks whose vectors are closest to the question's vector.</p>
+
+  <h2>🗄️ The VectorStore Class — Line by Line</h2>
+  <pre><code><span class="kw">import</span> faiss
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sentence_transformers <span class="kw">import</span> SentenceTransformer
+
+<span class="kw">class</span> <span class="cls">VectorStore</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        <span class="cmt"># Load the embedding model (~80MB, downloads on first run)</span>
+        self.model = <span class="cls">SentenceTransformer</span>(<span class="str">"all-MiniLM-L6-v2"</span>)
+        
+        self.index = <span class="kw">None</span>   <span class="cmt"># FAISS index — None until first chunk added</span>
+        self.chunks = []    <span class="cmt"># Stores chunk metadata (text, page_num, etc.)</span>
+        self.dimension = <span class="num">384</span>  <span class="cmt"># all-MiniLM-L6-v2 output size</span>
+    
+    <span class="kw">def</span> <span class="fn">add_chunks</span>(self, chunks):
+        <span class="cmt"># Step 1: Extract just the text from each chunk dict</span>
+        texts = [chunk[<span class="str">"text"</span>] <span class="kw">for</span> chunk <span class="kw">in</span> chunks]
+        <span class="cmt"># List comprehension — Python shorthand for a for loop</span>
+        <span class="cmt"># Same as: texts = []; for c in chunks: texts.append(c["text"])</span>
+        
+        <span class="cmt"># Step 2: Convert all texts to 384-dim vectors in one batch</span>
+        embeddings = self.model.<span class="fn">encode</span>(texts, show_progress_bar=<span class="kw">True</span>)
+        <span class="cmt"># embeddings.shape = (num_chunks, 384)</span>
+        
+        <span class="cmt"># Step 3: Convert to float32 (FAISS requirement)</span>
+        embeddings = np.<span class="fn">array</span>(embeddings, dtype=np.float32)
+        
+        <span class="cmt"># Step 4: Create FAISS index on first call</span>
+        <span class="kw">if</span> self.index <span class="kw">is None</span>:
+            <span class="cmt"># IndexFlatL2 = exact search using L2 (Euclidean) distance</span>
+            self.index = faiss.<span class="cls">IndexFlatL2</span>(self.dimension)
+        
+        <span class="cmt"># Step 5: Add vectors to FAISS (assigns IDs 0, 1, 2, ...)</span>
+        self.index.<span class="fn">add</span>(embeddings)
+        
+        <span class="cmt"># Step 6: Store metadata (parallel to FAISS IDs)</span>
+        self.chunks.<span class="fn">extend</span>(chunks)
+    
+    <span class="kw">def</span> <span class="fn">search</span>(self, query, top_k=<span class="num">5</span>):
+        <span class="cmt"># Step 1: Embed the query (same model as chunks)</span>
+        query_embedding = self.model.<span class="fn">encode</span>([query])
+        query_embedding = np.<span class="fn">array</span>(query_embedding, dtype=np.float32)
+        
+        <span class="cmt"># Step 2: FAISS finds top_k nearest vectors</span>
+        distances, indices = self.index.<span class="fn">search</span>(query_embedding, top_k)
+        <span class="cmt"># distances[0] = [0.23, 0.45, 0.67, ...] (L2 distances)</span>
+        <span class="cmt"># indices[0]   = [42, 7, 113, ...]        (chunk IDs)</span>
+        
+        <span class="cmt"># Step 3: Look up chunk metadata by FAISS ID</span>
+        results = []
+        <span class="kw">for</span> i, idx <span class="kw">in</span> <span class="fn">enumerate</span>(indices[<span class="num">0</span>]):
+            <span class="kw">if</span> idx != -<span class="num">1</span>:  <span class="cmt"># -1 means FAISS found fewer than top_k</span>
+                chunk = self.chunks[idx].<span class="fn">copy</span>()
+                chunk[<span class="str">"score"</span>] = <span class="fn">float</span>(distances[<span class="num">0</span>][i])
+                results.<span class="fn">append</span>(chunk)
+        
+        <span class="kw">return</span> results  <span class="cmt"># Sorted best-first by FAISS</span></code></pre>
+
+  <div class="callout key">
+    <div class="callout-icon">🎓</div>
+    <div class="callout-body">
+      <div class="callout-title">Interview-Ready Explanation</div>
+      <div class="callout-text">
+        <strong>"How does semantic search work?"</strong><br>
+        We use sentence-transformers to map text into a 384-dimensional vector space where semantic similarity corresponds to geometric proximity. We index these vectors in FAISS using L2 distance. At query time, the question is embedded with the same model and FAISS returns the k nearest neighbors in O(n) time — no keyword matching, pure meaning-based retrieval.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 5 — GROQ CLIENT
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 5</div>
+    <div class="chapter-title">groq_client.py</div>
+    <div class="chapter-desc">Step 3 of RAG: Prompt engineering + calling the LLM to generate grounded answers</div>
+  </div>
+
+  <h2>🤖 What is Groq?</h2>
+  <p>
+    <strong>Groq</strong> is a company that built custom AI chips called <strong>LPUs (Language Processing Units)</strong>.
+    They run Meta's <strong>LLaMA 3 70B</strong> model — one of the most powerful open-source LLMs — at speeds of
+    <strong>700+ tokens/second</strong> (vs. 30-50 tokens/second on regular GPUs). And it's <strong>completely free</strong> on their free tier.
+  </p>
+
+  <h2>✍️ Prompt Engineering — The Most Important Skill</h2>
+  <p>
+    Prompt engineering is the art of crafting instructions that get the LLM to behave exactly as you want.
+    In RAG, the key instruction is: <em>"Only answer from the provided context."</em>
+    This prevents the LLM from "hallucinating" (making up facts).
+  </p>
+
+  <pre><code><span class="kw">def</span> <span class="fn">build_rag_prompt</span>(question, context_chunks):
+    <span class="cmt"># Build the context section (the retrieved chunks)</span>
+    context_parts = []
+    <span class="kw">for</span> i, chunk <span class="kw">in</span> <span class="fn">enumerate</span>(context_chunks, <span class="num">1</span>):
+        context_parts.<span class="fn">append</span>(
+            <span class="str">f"[Source {i} | Page {chunk['page_num']}]\n{chunk['text']}"</span>
+        )
+    context = <span class="str">"\n\n"</span>.<span class="fn">join</span>(context_parts)  <span class="cmt"># Join with blank lines</span>
+    
+    <span class="cmt"># The RAG prompt — three parts: instructions + context + question</span>
+    prompt = <span class="str">f"""You are an expert AI analyst analyzing business documents.
+
+INSTRUCTIONS:
+- Answer the question ONLY using the provided context below.
+- If the context doesn't contain the answer, say so explicitly.
+- Always cite which page the information comes from.
+
+CONTEXT FROM DOCUMENTS:
+{context}
+
+USER QUESTION: {question}
+
+YOUR ANSWER:"""</span>
+    
+    <span class="kw">return</span> prompt</code></pre>
+
+  <pre><code><span class="kw">def</span> <span class="fn">ask_groq</span>(question, context_chunks, model=<span class="str">"llama3-70b-8192"</span>):
+    <span class="cmt"># Read API key from environment (.env file)</span>
+    api_key = os.<span class="fn">getenv</span>(<span class="str">"GROQ_API_KEY"</span>)
+    
+    <span class="cmt"># Create the Groq client (like a phone connection to their servers)</span>
+    client = <span class="cls">Groq</span>(api_key=api_key)
+    
+    <span class="cmt"># Call the API — same interface as OpenAI</span>
+    response = client.chat.completions.<span class="fn">create</span>(
+        model=model,
+        messages=[
+            {
+                <span class="str">"role"</span>: <span class="str">"system"</span>,      <span class="cmt"># Background instructions for the AI</span>
+                <span class="str">"content"</span>: <span class="str">"You are a precise document analyst..."</span>
+            },
+            {
+                <span class="str">"role"</span>: <span class="str">"user"</span>,        <span class="cmt"># The actual prompt from the user</span>
+                <span class="str">"content"</span>: <span class="fn">build_rag_prompt</span>(question, context_chunks)
+            }
+        ],
+        temperature=<span class="num">0.1</span>,   <span class="cmt"># Low randomness → factual answers</span>
+        max_tokens=<span class="num">1024</span>,  <span class="cmt"># Max response length (~750 words)</span>
+    )
+    
+    <span class="cmt"># Extract the answer text from the response object</span>
+    answer = response.choices[<span class="num">0</span>].message.content
+    
+    <span class="kw">return</span> {
+        <span class="str">"answer"</span>:      answer,
+        <span class="str">"sources"</span>:     <span class="fn">sorted</span>(<span class="fn">set</span>(c[<span class="str">"page_num"</span>] <span class="kw">for</span> c <span class="kw">in</span> context_chunks)),
+        <span class="str">"tokens_used"</span>: response.usage.total_tokens
+    }</code></pre>
+
+  <table>
+    <thead>
+      <tr><th>Temperature</th><th>Behavior</th><th>Use Case</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>0.0</code></td><td>Fully deterministic — always same answer</td><td>Math, code generation</td></tr>
+      <tr><td><code>0.1</code></td><td>Near-deterministic, slight variation</td><td>✅ Document Q&amp;A (our use case)</td></tr>
+      <tr><td><code>0.5</code></td><td>Balanced creativity</td><td>General chatbots</td></tr>
+      <tr><td><code>1.0</code></td><td>High creativity, more hallucination risk</td><td>Story writing, brainstorming</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 6 — FASTAPI BACKEND
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 6</div>
+    <div class="chapter-title">app/main.py — FastAPI REST API</div>
+    <div class="chapter-desc">The web server that ties everything together with clean REST endpoints</div>
+  </div>
+
+  <h2>🚀 What is a REST API?</h2>
+  <p>A REST API is a set of URLs (endpoints) that your app exposes. Other programs (like our Streamlit UI) can send HTTP requests to these URLs to do things like upload files or ask questions.</p>
+
+  <table>
+    <thead>
+      <tr><th>Method</th><th>Endpoint</th><th>What it does</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>GET</code></td><td><code>/</code></td><td>Health check — "Is the server alive?"</td></tr>
+      <tr><td><code>POST</code></td><td><code>/upload</code></td><td>Upload a PDF and index it in FAISS</td></tr>
+      <tr><td><code>POST</code></td><td><code>/ask</code></td><td>Ask a question, get AI answer + sources</td></tr>
+      <tr><td><code>GET</code></td><td><code>/documents</code></td><td>List all indexed documents</td></tr>
+      <tr><td><code>GET</code></td><td><code>/stats</code></td><td>How many chunks are indexed?</td></tr>
+      <tr><td><code>DELETE</code></td><td><code>/clear</code></td><td>Remove all documents from the index</td></tr>
+    </tbody>
+  </table>
+
+  <pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, UploadFile, File, HTTPException
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+
+app = <span class="cls">FastAPI</span>(title=<span class="str">"DocuMind RAG API"</span>)
+
+<span class="cmt"># ── Pydantic Model for /ask request ──────────────────────────────</span>
+<span class="cmt"># Pydantic validates that incoming JSON has the right types</span>
+<span class="kw">class</span> <span class="cls">QuestionRequest</span>(<span class="cls">BaseModel</span>):
+    question: <span class="cls">str</span>   <span class="cmt"># Required string field</span>
+    top_k: <span class="cls">int</span> = <span class="num">5</span>  <span class="cmt"># Optional, defaults to 5</span>
+
+<span class="cmt"># ── /upload endpoint ──────────────────────────────────────────────</span>
+<span class="dec">@app.post</span>(<span class="str">"/upload"</span>)
+<span class="kw">async def</span> <span class="fn">upload_document</span>(file: <span class="cls">UploadFile</span> = <span class="cls">File</span>(...)):
+    <span class="kw">if not</span> file.filename.<span class="fn">endswith</span>(<span class="str">".pdf"</span>):
+        <span class="kw">raise</span> <span class="cls">HTTPException</span>(status_code=<span class="num">400</span>, detail=<span class="str">"Only PDFs accepted"</span>)
+    
+    <span class="cmt"># Save file to disk</span>
+    file_path = <span class="str">f"uploaded_docs/{file.filename}"</span>
+    <span class="kw">with</span> <span class="fn">open</span>(file_path, <span class="str">"wb"</span>) <span class="kw">as</span> f:
+        shutil.<span class="fn">copyfileobj</span>(file.file, f)  <span class="cmt"># Stream file bytes to disk</span>
+    
+    <span class="cmt"># Run the RAG indexing pipeline</span>
+    doc_info = <span class="fn">process_document</span>(file_path, file.filename)
+    <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"success"</span>, <span class="str">"document"</span>: doc_info}
+
+<span class="cmt"># ── /ask endpoint ─────────────────────────────────────────────────</span>
+<span class="dec">@app.post</span>(<span class="str">"/ask"</span>)
+<span class="kw">async def</span> <span class="fn">ask</span>(request: <span class="cls">QuestionRequest</span>):
+    <span class="cmt"># FastAPI automatically parses the JSON body into QuestionRequest</span>
+    result = <span class="fn">answer_question</span>(request.question, top_k=request.top_k)
+    <span class="kw">return</span> result</code></pre>
+
+  <div class="callout tip">
+    <div class="callout-icon">⭐</div>
+    <div class="callout-body">
+      <div class="callout-title">Free Interactive Docs</div>
+      <div class="callout-text">
+        FastAPI automatically generates interactive API documentation at <code>http://localhost:8000/docs</code>.
+        You can test every endpoint directly in the browser — upload files, send questions, and see responses.
+        This is built using the <strong>Swagger UI</strong> standard and uses your Pydantic models to show the expected request/response format.
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">🔗</div>
+    <div class="callout-body">
+      <div class="callout-title">Why async def?</div>
+      <div class="callout-text">
+        <code>async def</code> makes the function asynchronous — it can handle multiple requests simultaneously without blocking. While one request waits for the Groq API to respond (network I/O), FastAPI can serve other requests. This makes the server much more efficient under load.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 7 — STREAMLIT UI
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 7</div>
+    <div class="chapter-title">streamlit_app.py — The UI</div>
+    <div class="chapter-desc">Building an interactive chat interface that talks to the FastAPI backend</div>
+  </div>
+
+  <h2>🎨 How Streamlit Works</h2>
+  <p>Streamlit is magical: every Python function call becomes a UI element. But there's one key thing to understand:</p>
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <div class="callout-title">Streamlit Re-runs the Entire Script on Every Interaction</div>
+      <div class="callout-text">
+        Every time a user clicks a button, types something, or uses a slider, Streamlit re-executes <em>every line</em> of <code>streamlit_app.py</code> from top to bottom. This is why we use <code>st.session_state</code> — it's the only way to preserve data between re-runs (like a phone's RAM that survives between app refreshes).
+      </div>
+    </div>
+  </div>
+
+  <pre><code><span class="kw">import</span> streamlit <span class="kw">as</span> st
+<span class="kw">import</span> requests
+
+<span class="cmt"># ── Must be FIRST Streamlit command ──────────────────────────────</span>
+st.<span class="fn">set_page_config</span>(
+    page_title=<span class="str">"DocuMind"</span>,
+    page_icon=<span class="str">"🧠"</span>,
+    layout=<span class="str">"wide"</span>         <span class="cmt"># Use full browser width</span>
+)
+
+<span class="cmt"># ── Session State — persists between re-runs ──────────────────────</span>
+<span class="kw">if</span> <span class="str">"chat_history"</span> <span class="kw">not in</span> st.session_state:
+    st.session_state.chat_history = []  <span class="cmt"># List of message dicts</span>
+
+<span class="cmt"># ── Sidebar — file upload + document list ─────────────────────────</span>
+<span class="kw">with</span> st.sidebar:
+    uploaded_file = st.<span class="fn">file_uploader</span>(<span class="str">"Choose a PDF"</span>, type=[<span class="str">"pdf"</span>])
+    
+    <span class="kw">if</span> st.<span class="fn">button</span>(<span class="str">"🚀 Process Document"</span>):
+        <span class="cmt"># Call FastAPI /upload endpoint</span>
+        files = {<span class="str">"file"</span>: (uploaded_file.name, uploaded_file.<span class="fn">getvalue</span>())}
+        r = requests.<span class="fn">post</span>(<span class="str">"http://localhost:8000/upload"</span>, files=files)
+        st.<span class="fn">success</span>(<span class="str">"Indexed!"</span>)
+
+<span class="cmt"># ── Chat interface — display history ─────────────────────────────</span>
+<span class="kw">for</span> msg <span class="kw">in</span> st.session_state.chat_history:
+    <span class="kw">if</span> msg[<span class="str">"role"</span>] == <span class="str">"user"</span>:
+        st.<span class="fn">markdown</span>(<span class="str">f"**You:** {msg['content']}"</span>)
+    <span class="kw">else</span>:
+        st.<span class="fn">markdown</span>(<span class="str">f"**AI:** {msg['content']}"</span>)
+
+<span class="cmt"># ── Chat input — sticky bar at bottom ────────────────────────────</span>
+question = st.<span class="fn">chat_input</span>(<span class="str">"Ask a question..."</span>)
+
+<span class="kw">if</span> question:
+    <span class="cmt"># Add to history</span>
+    st.session_state.chat_history.<span class="fn">append</span>({<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: question})
+    
+    <span class="cmt"># Call FastAPI /ask endpoint</span>
+    r = requests.<span class="fn">post</span>(<span class="str">"http://localhost:8000/ask"</span>,
+                       json={<span class="str">"question"</span>: question, <span class="str">"top_k"</span>: <span class="num">5</span>})
+    result = r.<span class="fn">json</span>()
+    
+    <span class="cmt"># Save AI response to history</span>
+    st.session_state.chat_history.<span class="fn">append</span>({
+        <span class="str">"role"</span>: <span class="str">"assistant"</span>,
+        <span class="str">"content"</span>: result[<span class="str">"answer"</span>]
+    })
+    
+    st.<span class="fn">rerun</span>()  <span class="cmt"># Force re-render to show new messages</span></code></pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 8 — HOW TO RUN
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 8</div>
+    <div class="chapter-title">How to Run the System</div>
+    <div class="chapter-desc">Step-by-step setup from zero to working demo</div>
+  </div>
+
+  <h2>🔑 Step 1: Get Your Free Groq API Key</h2>
+  <ol class="steps">
+    <li>
+      <div class="step-content">
+        <div class="step-title">Visit console.groq.com</div>
+        <div class="step-desc">Go to <strong>https://console.groq.com</strong> in your browser</div>
+      </div>
+    </li>
+    <li>
+      <div class="step-content">
+        <div class="step-title">Sign up (30 seconds, no credit card)</div>
+        <div class="step-desc">Use Google or GitHub — it's completely free</div>
+      </div>
+    </li>
+    <li>
+      <div class="step-content">
+        <div class="step-title">Create an API Key</div>
+        <div class="step-desc">Go to "API Keys" in the sidebar → "Create API Key" → Copy the key (starts with <code>gsk_...</code>)</div>
+      </div>
+    </li>
+    <li>
+      <div class="step-content">
+        <div class="step-title">Add it to your .env file</div>
+        <div class="step-desc">Open <code>c:\Users\bhave\Desktop\dox\.env</code> and replace <code>YOUR_GROQ_API_KEY_HERE</code> with your actual key</div>
+      </div>
+    </li>
+  </ol>
+
+  <pre style="position:relative"><div class="code-label">.env file</div><code><span class="var">GROQ_API_KEY</span>=gsk_your_actual_key_here</code></pre>
+
+  <h2>⚡ Step 2: Quick Start (One-Click)</h2>
+  <p>The easiest way — just double-click <code>run.bat</code> in your <code>dox/</code> folder. It starts both servers automatically.</p>
+
+  <h2>🖥️ Step 2 (Alternative): Manual Start</h2>
+  <p>Open <strong>two separate terminal windows</strong> in your <code>dox/</code> folder:</p>
+
+  <p><strong>Terminal 1 — Start the FastAPI backend:</strong></p>
+  <pre><code><span class="cmt"># Activate the virtual environment first</span>
+.venv\Scripts\activate
+
+<span class="cmt"># Start FastAPI (uvicorn is the server that runs it)</span>
+uvicorn app.main:app --reload --port 8000
+
+<span class="cmt"># You should see:</span>
+<span class="cmt"># INFO:     Uvicorn running on http://127.0.0.1:8000</span>
+<span class="cmt"># INFO:     Application startup complete.</span></code></pre>
+
+  <p><strong>Terminal 2 — Start the Streamlit UI:</strong></p>
+  <pre><code><span class="cmt"># In a NEW terminal window (keep Terminal 1 running)</span>
+.venv\Scripts\activate
+
+<span class="cmt"># Start Streamlit</span>
+streamlit run streamlit_app.py --server.port 8501
+
+<span class="cmt"># Your browser will automatically open http://localhost:8501</span></code></pre>
+
+  <h2>📄 Step 3: Upload a PDF and Ask Questions</h2>
+  <ol class="steps">
+    <li>
+      <div class="step-content">
+        <div class="step-title">Open the Streamlit UI</div>
+        <div class="step-desc">Go to <strong>http://localhost:8501</strong> in your browser</div>
+      </div>
+    </li>
+    <li>
+      <div class="step-content">
+        <div class="step-title">Check the API status</div>
+        <div class="step-desc">The sidebar should show 🟢 API Connected. If it shows 🔴, start FastAPI first.</div>
+      </div>
+    </li>
+    <li>
+      <div class="step-content">
+        <div class="step-title">Upload a PDF</div>
+        <div class="step-desc">Click "Choose a PDF file" → select any PDF → click "🚀 Process &amp; Index Document". Wait for the success message showing page count.</div>
+      </div>
+    </li>
+    <li>
+      <div class="step-content">
+        <div class="step-title">Ask a question</div>
+        <div class="step-desc">Type in the chat bar at the bottom. The AI will answer using only the uploaded document's content, with page citations.</div>
+      </div>
+    </li>
+  </ol>
+
+  <div class="callout tip">
+    <div class="callout-icon">🎯</div>
+    <div class="callout-body">
+      <div class="callout-title">Good Demo Questions for Celonis Interview</div>
+      <div class="callout-text">
+        If you upload a Celonis annual report or any business PDF, try:<br>
+        • "What is the company's AI strategy?"<br>
+        • "What were the key financial highlights?"<br>
+        • "Who are the main customers mentioned?"<br>
+        • "What risks does the company identify?"<br>
+        The interviewer can type their own questions and see it work live!
+      </div>
+    </div>
+  </div>
+
+  <h2>🌐 Step 4: Explore the Auto-Generated API Docs</h2>
+  <p>While FastAPI is running, visit <strong>http://localhost:8000/docs</strong> to see the interactive Swagger UI — you can test every endpoint directly in the browser.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 9 — INTERVIEW PREP
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 9</div>
+    <div class="chapter-title">Interview Preparation</div>
+    <div class="chapter-desc">How to talk about this project confidently at Celonis — questions and perfect answers</div>
+  </div>
+
+  <h2>💬 Q&amp;A: Explain Every Part at Any Level</h2>
+
+  <h3>"What is RAG and why did you build it?"</h3>
+  <div class="callout key">
+    <div class="callout-icon">🎓</div>
+    <div class="callout-body">
+      <div class="callout-title">Perfect Answer</div>
+      <div class="callout-text">
+        "RAG stands for Retrieval-Augmented Generation. The core problem is that LLMs have a limited context window and can't read enterprise documents at scale. RAG solves this with two phases: first, we embed document chunks into a vector space and index them in FAISS. At query time, we embed the user's question, find the semantically nearest chunks, and inject them as context into the LLM prompt. This grounds the answer in real document content and eliminates hallucination — the LLM can only cite what's in front of it."
+      </div>
+    </div>
+  </div>
+
+  <h3>"How does the vector similarity search work?"</h3>
+  <div class="callout key">
+    <div class="callout-icon">🎓</div>
+    <div class="callout-body">
+      <div class="callout-title">Perfect Answer</div>
+      <div class="callout-text">
+        "We use all-MiniLM-L6-v2, a sentence-transformer model that maps text to 384-dimensional vectors. Semantically similar text produces geometrically close vectors. FAISS stores these vectors and uses L2 (Euclidean) distance for exact nearest-neighbor search. At query time, the question is embedded with the same model and FAISS returns the k nearest chunk vectors. This is semantic search — unlike keyword matching (TF-IDF, BM25), it understands paraphrase and synonymy."
+      </div>
+    </div>
+  </div>
+
+  <h3>"How does this relate to Celonis's AI strategy?"</h3>
+  <div class="callout key">
+    <div class="callout-icon">🎓</div>
+    <div class="callout-body">
+      <div class="callout-title">Perfect Answer</div>
+      <div class="callout-text">
+        "Celonis sits on massive amounts of unstructured process data — audit trails, case notes, email chains. RAG is exactly the technology that unlocks AI value from this data without requiring it to be perfectly structured. This system demonstrates three key skills from the job description: NLP pipeline engineering, GenAI integration with production-grade APIs, and building AI interfaces that business users can interact with — no data science background required."
+      </div>
+    </div>
+  </div>
+
+  <h3>"Why FastAPI instead of Flask?"</h3>
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div class="callout-body">
+      <div class="callout-title">Answer</div>
+      <div class="callout-text">
+        FastAPI is async-native (built on ASGI/Starlette) vs Flask's synchronous WSGI. It provides automatic OpenAPI documentation, Pydantic validation, and dependency injection out of the box. For an AI API that makes external network calls (to Groq), async is critical — it doesn't block the event loop while waiting for LLM responses.
+      </div>
+    </div>
+  </div>
+
+  <h3>"What would you do to scale this to production?"</h3>
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div class="callout-body">
+      <div class="callout-title">Answer</div>
+      <div class="callout-text">
+        1. <strong>Persistent storage</strong>: Replace in-memory FAISS with Pinecone or Weaviate for multi-server durability<br>
+        2. <strong>Authentication</strong>: Add JWT tokens to the FastAPI endpoints<br>
+        3. <strong>Async processing</strong>: Move PDF indexing to a Celery/Redis background queue (indexing large PDFs shouldn't block the API)<br>
+        4. <strong>Caching</strong>: Cache common question embeddings with Redis to avoid redundant LLM calls<br>
+        5. <strong>Observability</strong>: Add LangSmith tracing to monitor RAG chain quality
+      </div>
+    </div>
+  </div>
+
+  <h2>📊 Tech Stack Justification Table</h2>
+  <table>
+    <thead>
+      <tr><th>Technology</th><th>Why Chosen</th><th>Alternative</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Groq (LLaMA 3 70B)</td>
+        <td>Free, fastest inference, open-source model</td>
+        <td>OpenAI GPT-4 (paid), Ollama (local)</td>
+      </tr>
+      <tr>
+        <td>FAISS (cpu)</td>
+        <td>Local, no server, battle-tested at Meta scale</td>
+        <td>ChromaDB (server), Pinecone (cloud, paid)</td>
+      </tr>
+      <tr>
+        <td>sentence-transformers</td>
+        <td>Free, local, 80MB, strong semantic quality</td>
+        <td>OpenAI Ada embeddings (paid, 1536-dim)</td>
+      </tr>
+      <tr>
+        <td>PyMuPDF (fitz)</td>
+        <td>Best text extraction accuracy, handles complex layouts</td>
+        <td>pdfplumber, PDFMiner, pdfminer.six</td>
+      </tr>
+      <tr>
+        <td>FastAPI</td>
+        <td>Async, auto-docs, Pydantic, production-grade</td>
+        <td>Flask (sync, no auto-docs), Django (too heavy)</td>
+      </tr>
+      <tr>
+        <td>Streamlit</td>
+        <td>Instant web UI from Python, perfect for demos</td>
+        <td>Gradio, React + Vite (much more code)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 10 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 10</div>
+    <div class="chapter-title">Troubleshooting</div>
+    <div class="chapter-desc">Common errors and exactly how to fix them</div>
+  </div>
+
+  <h2>🔴 Common Errors &amp; Fixes</h2>
+
+  <h3>Error: "GROQ_API_KEY not found"</h3>
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <div class="callout-title">Fix</div>
+      <div class="callout-text">
+        Open <code>dox\.env</code> and make sure it contains exactly:<br>
+        <code>GROQ_API_KEY=gsk_your_key_here</code><br>
+        No quotes, no spaces around the = sign. Then restart FastAPI.
+      </div>
+    </div>
+  </div>
+
+  <h3>Error: "🔴 API Offline" in Streamlit</h3>
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <div class="callout-title">Fix</div>
+      <div class="callout-text">
+        FastAPI is not running. Start it first:<br>
+        <code>.venv\Scripts\activate</code><br>
+        <code>uvicorn app.main:app --reload</code><br>
+        Then refresh Streamlit.
+      </div>
+    </div>
+  </div>
+
+  <h3>Error: "ModuleNotFoundError: No module named 'fitz'"</h3>
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <div class="callout-title">Fix</div>
+      <div class="callout-text">
+        The virtual environment isn't activated. Run:<br>
+        <code>.venv\Scripts\activate</code><br>
+        Then try again. You should see <code>(.venv)</code> in your terminal prompt.
+      </div>
+    </div>
+  </div>
+
+  <h3>Error: "sentence-transformers downloading model every time"</h3>
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div class="callout-body">
+      <div class="callout-title">This is normal on first run</div>
+      <div class="callout-text">
+        The all-MiniLM-L6-v2 model (~80MB) downloads once and is cached. After the first run, it loads from cache in &lt;2 seconds. The cache is stored in <code>~/.cache/torch/sentence_transformers/</code>.
+      </div>
+    </div>
+  </div>
+
+  <h3>Error: "No documents have been uploaded yet"</h3>
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <div class="callout-title">Fix</div>
+      <div class="callout-text">
+        The FAISS index is in-memory — it resets every time you restart FastAPI. Always upload your PDF again after restarting the server.
+      </div>
+    </div>
+  </div>
+
+  <h2>✅ Verification Checklist</h2>
+  <ul>
+    <li>✅ <code>dox\.env</code> contains a valid <code>GROQ_API_KEY</code></li>
+    <li>✅ Both servers are running (FastAPI on :8000, Streamlit on :8501)</li>
+    <li>✅ The virtual environment is activated (<code>.venv\Scripts\activate</code>)</li>
+    <li>✅ Streamlit sidebar shows 🟢 API Connected</li>
+    <li>✅ A PDF has been uploaded and shows in the "Indexed Documents" section</li>
+    <li>✅ API docs accessible at <code>http://localhost:8000/docs</code></li>
+  </ul>
+
+  <hr>
+
+  <div class="callout tip">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-body">
+      <div class="callout-title">Pro Demo Tip for Interviews</div>
+      <div class="callout-text">
+        Before the interview: upload a Celonis annual report or process mining whitepaper to the system.
+        During the demo: show the interviewer typing questions like "What is Celonis's approach to AI?" and getting grounded, page-cited answers in real time.
+        Then show the <code>/docs</code> page to demonstrate the production-grade API design.
+        This hits: Python, NLP, GenAI, LLMs, Unstructured Data, REST APIs — all in one live demo.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-size:2rem; margin-bottom:0.5rem;">🧠</div>
+    <strong style="color:#a78bfa; font-size:1rem;">DocuMind RAG System</strong><br>
+    Built for Celonis AI Internship Portfolio · Python · LangChain · FAISS · Groq · FastAPI · Streamlit<br>
+    <span style="color:#374151; font-size:0.75rem; margin-top:0.5rem; display:block;">
+      RAG Pipeline · Semantic Search · Prompt Engineering · REST API Design · Interactive AI Demo
+    </span>
+  </div>
+</div>
+
+</body>
+</html>
