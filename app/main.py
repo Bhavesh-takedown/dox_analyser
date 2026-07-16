@@ -25,7 +25,7 @@ from .rag_pipeline import (
 app = FastAPI(
     title="DocuMind RAG API",
     description="Intelligent Document Q&A System using RAG (Retrieval-Augmented Generation).",
-    version="1.0.0",
+    version="1.1.0",
 )
 
 app.add_middleware(

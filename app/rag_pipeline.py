@@ -31,8 +31,14 @@ from .groq_client import ask_groq                               # Step 3: LLM an
 # ── Global State ───────────────────────────────────────────────────────────────
 # These live for as long as the FastAPI server is running.
 
+FAISS_STORE_DIR = "faiss_store"  # Where the persisted index lives on disk
+
 # The single shared vector store — holds ALL indexed chunks from ALL documents
 vector_store = VectorStore()
+
+# Auto-load a previously persisted index so users don't have to re-upload
+# documents every time the server restarts.
+vector_store.load(FAISS_STORE_DIR)
 
 # Registry: maps doc_id → document metadata
 # e.g., {"abc-123": {"doc_id": "abc-123", "filename": "report.pdf", ...}}
@@ -95,6 +101,10 @@ def process_document(pdf_path: str, filename: str) -> Dict:
         "num_chunks": len(chunks),
     }
     documents_registry[doc_id] = doc_metadata
+
+    # ── Step 6: Persist the updated index to disk ──────────────────────────────
+    # This lets the index survive server restarts without re-uploading documents.
+    vector_store.save(FAISS_STORE_DIR)
 
     print(f"[Pipeline] Document '{filename}' indexed successfully (ID: {doc_id})")
     return doc_metadata
@@ -168,7 +178,13 @@ def clear_all() -> None:
     """
     Clear ALL documents from the vector store and registry.
     This is irreversible — the user must re-upload documents after calling this.
+    Also removes the persisted index from disk.
     """
     vector_store.clear()
     documents_registry.clear()
+    # Remove the persisted index so it isn't reloaded on the next server start
+    import shutil
+    import os
+    if os.path.isdir(FAISS_STORE_DIR):
+        shutil.rmtree(FAISS_STORE_DIR)
     print("[Pipeline] All documents cleared.")

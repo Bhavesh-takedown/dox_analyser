@@ -23,9 +23,11 @@
 #   We use IndexFlatL2 — it compares distances using L2 (Euclidean) distance.
 # ==============================================================================
 
+import os
 import faiss                        # Facebook AI Similarity Search
 import numpy as np                  # Numerical arrays (FAISS needs numpy arrays)
 import pickle                       # Save/load Python objects to disk
+from pathlib import Path
 from sentence_transformers import SentenceTransformer  # Local embedding model
 from typing import List, Dict, Optional
 
@@ -152,6 +154,54 @@ class VectorStore:
         self.index = None
         self.chunks = []
         print("[VectorStore] Cleared all documents.")
+
+    def save(self, directory: str = "faiss_store") -> None:
+        """
+        Persist the FAISS index and chunk metadata to disk.
+
+        This allows the vector store to survive server restarts without
+        requiring users to re-upload all their documents.
+
+        Args:
+            directory: Folder where index files will be saved.
+                       Creates the directory if it doesn't exist.
+
+        Saves two files:
+            - <directory>/index.faiss  — the raw FAISS binary index
+            - <directory>/chunks.pkl   — pickled list of chunk metadata dicts
+        """
+        if self.index is None:
+            print("[VectorStore] Nothing to save — index is empty.")
+            return
+
+        Path(directory).mkdir(parents=True, exist_ok=True)
+        faiss.write_index(self.index, os.path.join(directory, "index.faiss"))
+        with open(os.path.join(directory, "chunks.pkl"), "wb") as f:
+            pickle.dump(self.chunks, f)
+        print(f"[VectorStore] Saved {self.index.ntotal} vectors to '{directory}'.")
+
+    def load(self, directory: str = "faiss_store") -> bool:
+        """
+        Load a previously saved FAISS index and chunk metadata from disk.
+
+        Args:
+            directory: Folder containing index.faiss and chunks.pkl.
+
+        Returns:
+            True if loaded successfully, False if no saved data was found.
+        """
+        index_path  = os.path.join(directory, "index.faiss")
+        chunks_path = os.path.join(directory, "chunks.pkl")
+
+        if not os.path.exists(index_path) or not os.path.exists(chunks_path):
+            print(f"[VectorStore] No saved index found in '{directory}' — starting fresh.")
+            return False
+
+        self.index = faiss.read_index(index_path)
+        with open(chunks_path, "rb") as f:
+            self.chunks = pickle.load(f)
+        print(f"[VectorStore] Loaded {self.index.ntotal} vectors from '{directory}'.")
+        return True
 
     @property
     def total_chunks(self) -> int:

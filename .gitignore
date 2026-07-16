@@ -19,6 +19,12 @@ uploaded_docs/
 # Sentence transformers cache (re-downloads automatically)
 .cache/
 
+# Persisted FAISS vector index (generated at runtime)
+faiss_store/
+
+# Virtual environment
+.venv/
+
 # VS Code
 .vscode/
 
