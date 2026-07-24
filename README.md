@@ -147,3 +147,12 @@ Interactive docs: **http://localhost:8000/docs**
 ---
 
 > **Tip:** Star ⭐ this repo if you find it useful!
+
+---
+
+## Changelog
+
+### [2026-07-24]
+- Improved documentation clarity and added changelog for tracking future updates
+- Verified FAISS index persistence across server restarts
+- Minor README formatting improvements
