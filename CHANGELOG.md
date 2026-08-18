@@ -6,6 +6,15 @@ All notable changes to **Dox** (Intelligent Document Q&A System) are documented 
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-18
+
+### Improved
+- Enhanced error handling in RAG pipeline for edge cases with empty or malformed PDFs
+- Refined chunking strategy comments for better developer readability
+- Minor cleanup of unused imports and code style consistency across `app/` modules
+
+---
+
 ## [0.3.0] - 2026-07-28
 
 ### Added
