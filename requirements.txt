@@ -1,0 +1,26 @@
+# ─── Core LLM & RAG ───────────────────────────────────────────────────────────
+groq==0.9.0                   # Groq API client (free LLM: llama3-70b)
+httpx==0.27.2                 # HTTP client — MUST be <0.28 (groq 0.9.0 compatibility)
+langchain==0.2.16             # RAG orchestration framework
+langchain-community==0.2.16   # LangChain community integrations
+
+# ─── Embeddings & Vector Search ───────────────────────────────────────────────
+sentence-transformers==3.0.1  # Local embeddings (all-MiniLM-L6-v2)
+faiss-cpu==1.8.0              # Facebook AI Similarity Search (local, no server)
+
+# ─── PDF Processing ───────────────────────────────────────────────────────────
+pymupdf==1.24.9               # Best PDF text extractor (import as 'fitz')
+
+# ─── Backend API ──────────────────────────────────────────────────────────────
+fastapi==0.112.2              # REST API framework
+uvicorn[standard]==0.30.6     # ASGI server to run FastAPI
+python-multipart==0.0.9       # Required for file upload in FastAPI
+pydantic==2.8.2               # Data validation
+
+# ─── Frontend ─────────────────────────────────────────────────────────────────
+streamlit==1.37.1             # Interactive web UI
+requests==2.32.3              # HTTP client (Streamlit calls FastAPI)
+
+# ─── Utilities ────────────────────────────────────────────────────────────────
+python-dotenv==1.0.1          # Load .env file for API keys
+numpy==1.26.4                 # Array operations (used by FAISS + embeddings)
